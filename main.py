@@ -1,20 +1,17 @@
-"""File: ui.py
+"""File: main.py
 Simple PyQt5 GUI for testing the functions. Intended entry point for the project.
 Has a list to pick a function from, a box displaying the output,
 and another to show the function source code."""
 import re
 import sys
-# import inspect
-# import PyQt5 as qt
-# from PyQt5.QtCore import *
-# from PyQt5.QtGui import *
+import inspect
+import locale
 from PyQt5.QtWidgets import *
 
 import repositories as rps
-from design import Ui_Form
+from design import Ui_Form # Généré avec Qt Designer
+from ut import *
 
-import locale
-locale.setlocale(locale.LC_TIME, 'en_US.UTF-8')
 
 # def get_functions():
 #     attrs = list(map(
@@ -32,7 +29,14 @@ locale.setlocale(locale.LC_TIME, 'en_US.UTF-8')
 #
 #     return functions
 
+instructions = """Sélectionnez une des fonctions dans la liste de gauche pour l'exécuter. La sortie sera affichée dans cette boîte. 
+
+Vous pouvez aussi voir le code source de la fonction dans la boîte à droite. Elles sont toutes commentées (en anglais par convention). D'autres fonctions sont définies et utilisées, et visibles dans le fichier helper.py.
+
+Toutes les fonctions sont numérotées avec le numéro de la question à laquelle elles répondent."""
+
 tests = (
+    ("---INSTRUCTIONS---", None, None),
     ("3. init_recipes", rps.init_recipes, lambda fn, rcp: fn()),
     ("4. get_recipe_titles", rps.get_recipe_titles, lambda fn, rcp: fn(rcp)),
     ("5. get_total_ingredient_count", rps.get_total_ingredient_count, lambda fn, rcp: fn(rcp, 'egg')),
@@ -55,14 +59,15 @@ tests = (
     ('22. get_easiest_recipe', rps.get_easiest_recipe, lambda fn, rcp: fn(rcp)),
 )
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     Form = QWidget()
     ui = Ui_Form()
     ui.setupUi(Form)
+    Form.setWindowTitle("Grégoire Brosset - Programmation Fonctionnelle - Projet recettes")
 
-
-
+    # Populate test list
     ui.functionList.addItems(
         list(map(
             lambda x: x[0],
@@ -71,49 +76,23 @@ if __name__ == "__main__":
     )
 
     recipes = rps.init_recipes()
+    print(recipes)
 
-    ui.functionList.currentRowChanged.connect(
-        lambda x: ui.outputText.setText(
-            tests[x][2](tests[x][1], recipes)
-        )
-    )
 
+    def on_selection(self: int):
+        """
+        Slot; signaled by function list. Runs test corresponding to the selected entry.
+        :param self: function list index
+        """
+        if self == 0: # Instructions
+            ui.outputText.setText(instructions)
+            ui.sourceText.setText("")
+            return
+        test = tests[self]
+        ui.outputText.setText(ut_repr(test[2], test[1], recipes)) # Run the test
+        ui.sourceText.setText(inspect.getsource(test[1]))
+
+    ui.functionList.currentRowChanged.connect(on_selection)
 
     Form.show()
     sys.exit(app.exec_())
-
-    # app = QApplication([])
-    # app.setStyle("Fusion")
-    # app.setPalette(QApplication.style().standardPalette())
-    #
-    # window = QWidget()
-    # window.setWindowTitle("Recipe Manager")
-    # window.setGeometry(100, 100, 800, 600)
-    #
-    # layout = QVBoxLayout()
-    #
-    # # Create a list of functions
-    # functions = QListWidget()
-    # functions.addItems(["ut", "Recipe", "Ingredient", "NutritionInfo"])
-    #
-    # # Create a text box to display the output
-    # output = QTextEdit()
-    # output.setReadOnly(True)
-    #
-    # # Create a text box to display the function source code
-    # source = QTextEdit()
-    # source.setReadOnly(True)
-    #
-    # # Add the widgets to the layout
-    # layout.addWidget(functions)
-    # layout.addWidget(output)
-    # layout.addWidget(source)
-    #
-    # # Set the layout for the window
-    # window.setLayout(layout)
-    #
-    # # Show the window
-    # window.show()
-    # app.exec_()
-
-

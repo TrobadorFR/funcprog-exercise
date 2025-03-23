@@ -20,11 +20,11 @@ def ut_print(callable, *args):
 ut_print.call_count = 0
 
 
-# def ut_repr(callable, *args):
-#     """Helper method to test functions"""
-#     print("---------------")
-#     print(f"Testing {callable.__name__}")
-#     print("---------------")
-#     ret = callable(*args)
-#     return pformat(ret)
+def ut_repr(callable, *args):
+    """Helper method to test functions"""
+    print("---------------")
+    print(f"Testing {callable.__name__}")
+    print("---------------")
+    ret = callable(*args)
+    return pformat(ret)
 
